@@ -1,0 +1,274 @@
+
+spring:
+  liquibase:
+    enabled: true
+    drop-first: false
+    change-log: classpath:db/changelog/changelog.xml
+  jpa:
+    hibernate:
+      ddl-auto: none # to be maintained by Liquibase(PROD, QA) or Spring Boot (DEV)
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 5
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+        auto_quote_keyword: true # to allow DB reserved words to be used
+        integration:
+          envers:
+            enabled: false
+#        globally_quoted_identifiers: true # in preparation for POSTGRESQL
+
+
+log4jdbc:
+  dump:
+    sql:
+      addsemicolon: false
+logging:
+  level:
+    jdbc:
+      sqlonly: OFF
+      sqltiming: OFF
+      audit: OFF
+      resultset: OFF
+      resultsettable: OFF
+      connection: OFF
+    org:
+      hibernate:
+        engine:
+          jdbc:
+            batch:
+              internal:
+                BatchingBatch: DEBUG
+
+#jasypt:
+#  encryptor:
+#    algorithm: PBEWithMD5AndDES
+#    iv-generator-classname: org.jasypt.iv.NoIvGenerator
+---
+spring:
+  config:
+    activate:
+      on-profile: development
+  liquibase:
+    contexts: development
+#    enabled: true
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_ON_EXIT=FALSE #;TRACE_LEVEL_FIle=4 #Turn on for H2 logging
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    properties:
+      persistence:
+#        sharedCache:
+          #required - enable selective caching mode - only entities with @Cacheable annotation will use L2 cache.
+#          mode: ENABLE_SELECTIVE
+      hibernate:
+        format_sql: true # formats SQL to multiline output
+        use_sql_comments: true # ORM inserted explanation of the intent of the SQL
+        generate_statistics: true
+#        session:
+#          events:
+#            log:
+#              LOG_QUERIES_SLOWER_THAN_MS: 1
+#        javax:
+#          cache:
+#            provider: org.ehcache.jsr107.EhcacheCachingProvider
+#            uri: classpath:cacheConfig/ehcache3.xml
+#            missing_cache_strategy: create
+#        cache:
+#          #required - turn on L2 cache.
+#          use_second_level_cache: true
+#          #optional - turn on query cache.
+##          use_query_cache: true
+#          region:
+#            #required - classpath to cache region factory.
+#            factory_class: jcache
+  h2:
+    console:
+      enabled: true
+      path: /admin/dbconsole # same as CCS-MPS 1.x
+#  ldap:
+#    embedded:
+#      ldif: classpath:devLdap/ldapBootstrap.ldif
+#      base-dn: o=Lexmark,dc=lex,dc=lexmark,dc=com
+#      port: 33389
+#  ldap:
+#    urls: ldaps://tdirservices.lexmark.com:636 # ${LDAP_URL:ldaps://tdirservices.lexmark.com:636}
+#    username: uid=koshi,ou=System Accounts,o=Lexmark # ${LDAP_MGR_DN:uid=koshi,ou=System Accounts,o=Lexmark}
+#    password: appacc # ${LDAP_MGR_PWD:appacc}
+#  cache:
+#    jcache:
+#      config: classpath:cacheConfig/ehcache3.xml
+  sql:
+    init:
+      platform: h2
+      mode: never
+
+
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: '*'
+
+logging:
+  level:
+#    com:
+#      lexmark:
+#        ccs:
+#          mps:
+#            sb:
+#              ccsmps:
+#                services: DEBUG
+    org:
+##      ehcahe: DEBUG
+##      hibernate: DEBUG
+      hibernate:
+#        cache: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+        engine:
+          transaction:
+            internal:
+              TransactionImpl: DEBUG
+          jdbc:
+            env:
+              internal:
+                JdbcEnvironmentInitiator: DEBUG
+        cfg:
+          Settings: DEBUG
+        jpa:
+          internal:
+            util:
+              LogHelper: DEBUG
+        stat:
+          internal:
+            StatisticsImpl: DEBUG
+        query:
+          criteria:
+            internal:
+              CriteriaQueryImpl: DEBUG
+##        SQL_SLOW: INFO
+#      springframework:
+#        security: DEBUG
+##          web:
+##            FilterChainProxy: DEBUG
+        transaction: TRACE
+        orm:
+          jpa: DEBUG
+#        cache: TRACE
+#
+    jdbc:
+      sqltiming: DEBUG
+      resultsettable: INFO
+#      TODO load from externalized dir in QA and PROD env
+#  config: /Users/msalima/Documents/logback-spring.xml
+
+log4jdbc:
+  dump:
+    sql:
+      addsemicolon: true
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: integrationTest
+  datasource:
+    url: jdbc:h2:mem:testdb;mode=ORACLE;DB_CLOSE_ON_EXIT=FALSE #;TRACE_LEVEL_FIle=4 #Turn on for H2 logging
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true # formats SQL to multiline output
+#        use_sql_comments: true # ORM inserted explanation of the intent of the SQL
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: false
+  liquibase:
+    enabled: false
+  ldap:
+    urls: ldaps://tdirservices.lexmark.com:636 # ${LDAP_URL:ldaps://tdirservices.lexmark.com:636}
+    username: uid=koshi,ou=System Accounts,o=Lexmark # ${LDAP_MGR_DN:uid=koshi,ou=System Accounts,o=Lexmark}
+    password: appacc # ${LDAP_MGR_PWD:appacc}
+  sql:
+    init:
+      platform: h2
+      mode: never
+
+
+#logging:
+#  level:
+##    root: DEBUG
+#    com:
+#      lexmark:
+#        ccs:
+#          mps:
+#            sb:
+#              ccsmps:
+#                services: DEBUG
+#    org:
+#      hibernate:
+#        cache: DEBUG
+#        type:
+#          descriptor:
+#            sql:
+#              BasicBinder: TRACE
+#        engine:
+#          transaction:
+#            internal:
+#              TransactionImpl: DEBUG
+#          jdbc:
+#            env:
+#              internal:
+#                JdbcEnvironmentInitiator: DEBUG
+##            batch:
+##              internal:
+##                BatchingBatch: DEBUG
+#        cfg:
+#          Settings: DEBUG
+#        jpa:
+#          internal:
+#            util:
+#              LogHelper: DEBUG
+#        stat:
+#          internal:
+#            StatisticsImpl: DEBUG
+#        query:
+#          criteria:
+#            internal:
+#              CriteriaQueryImpl: DEBUG
+#      springframework:
+#        security: DEBUG
+#        transaction: TRACE
+#        orm:
+#          jpa: DEBUG
+#        cache: TRACE
+#    jdbc:
+#      sqltiming: DEBUG
+#      resultsettable: INFO
+#log4jdbc:
+#  dump:
+#    sql:
+#      addsemicolon: true
+
+
+
